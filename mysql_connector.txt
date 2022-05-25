@@ -1,0 +1,23 @@
+curl -v -XPOST -H'Accept:application/json' -H'Content-Type:application/json' http://connect1:18083/connectors \
+  -d '
+{
+    "name": "mysql-source-connector",
+    "config": {
+        "connector.class": "io.debezium.connector.mysql.MySqlConnector",
+        "database.hostname": "172.27.66.244",
+        "database.port": "3306",
+        "database.user": "root",
+        "database.password": "passwd",
+        "database.server.id": "1234",
+        "database.server.name": "mysql-1",
+        "database.include.list": "redpolex",
+        "database.history.kafka.bootstrap.servers": "172.27.66.244:19092, 172.27.66.244:29092, 172.27.66.244:39092",
+        "database.history.kafka.topic": "kafka-student-changes",
+        "include.schema.changes": "true",
+        "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+        "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+        "key.converter.schemas.enable": "false",
+        "value.converter.schemas.enable": "false"
+
+    }
+}'

@@ -1,0 +1,22 @@
+curl -v -XPOST -H'Accept:application/json' -H'Content-Type:application/json' http://connect1:18083/connectors \
+  -d '{
+    "name": "s3-sink-connector",
+    "config": {
+      "topics": "mysql-1.redpolex.kafka",
+      "connector.class": "io.confluent.connect.s3.S3SinkConnector",
+      "flush.size": 1,
+      "s3.bucket.name": "repdpolex-kafka-2022",
+      "s3.region": "ap-northeast-2",
+      "s3.part.size": "5242880",
+      "s3.proxy.url": "http://172.27.66.244:4566",
+      "format.class": "io.confluent.connect.s3.format.json.JsonFormat",
+      "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+      "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+      "key.converter.schemas.enable": "false",
+      "value.converter.schemas.enable": "false",
+      "storage.class": "io.confluent.connect.s3.storage.S3Storage",
+      "aws.access.key.id": "test",
+      "aws.secret.access.key": "test",
+      "topics.dir": "topicsdir"
+    }
+  }'

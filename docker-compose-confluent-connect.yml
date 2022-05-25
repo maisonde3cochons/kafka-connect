@@ -1,0 +1,167 @@
+version: '3'
+services:
+  zookeeper-1:
+    hostname: zookeeper1
+    image: confluentinc/cp-zookeeper:6.2.0
+    environment:
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_CLIENT_PORT: 12181
+      ZOOKEEPER_DATA_DIR: /zookeeper/data
+      ZOOKEEPER_SERVERS: zookeeper1:22888:23888;zookeeper2:32888:33888;zookeeper3:42888:43888
+    ports:
+      - 12181:12181
+      - 22888:22888
+      - 23888:23888
+    volumes:
+      - ./zookeeper/data/1:/zookeeper/data
+
+  zookeeper-2:
+    hostname: zookeeper2
+    image: confluentinc/cp-zookeeper:6.2.0
+    environment:
+      ZOOKEEPER_SERVER_ID: 2
+      ZOOKEEPER_CLIENT_PORT: 22181
+      ZOOKEEPER_DATA_DIR: /zookeeper/data
+      ZOOKEEPER_SERVERS: zookeeper1:22888:23888;zookeeper2:32888:33888;zookeeper3:42888:43888
+    ports:
+      - 22181:22181
+      - 32888:32888
+      - 33888:33888
+    volumes:
+      - ./zookeeper/data/2:/zookeeper/data
+
+  zookeeper-3:
+    hostname: zookeeper3
+    image: confluentinc/cp-zookeeper:6.2.0
+    environment:
+      ZOOKEEPER_SERVER_ID: 3
+      ZOOKEEPER_CLIENT_PORT: 32181
+      ZOOKEEPER_DATA_DIR: /zookeeper/data
+      ZOOKEEPER_SERVERS: zookeeper1:22888:23888;zookeeper2:32888:33888;zookeeper3:42888:43888
+    ports:
+      - 32181:32181
+      - 42888:42888
+      - 43888:43888
+    volumes:
+      - ./zookeeper/data/3:/zookeeper/data
+
+  kafka-1:
+    image: confluentinc/cp-kafka:6.2.0
+    hostname: kafka1
+    depends_on:
+      - zookeeper-1
+      - zookeeper-2
+      - zookeeper-3
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper1:12181,zookeeper2:22181,zookeeper3:32181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:19092
+      KAFKA_LOG_DIRS: /kafka
+    ports:
+      - 19092:19092
+    volumes:
+      - ./kafka/logs/1:/kafka
+
+  kafka-2:
+    image: confluentinc/cp-kafka:6.2.0
+    hostname: kafka2
+    depends_on:
+      - zookeeper-1
+      - zookeeper-2
+      - zookeeper-3
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper1:12181,zookeeper2:22181,zookeeper3:32181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:29092
+      KAFKA_LOG_DIRS: /kafka
+    ports:
+      - 29092:29092
+    volumes:
+      - ./kafka/logs/2:/kafka
+
+  kafka-3:
+    image: confluentinc/cp-kafka:6.2.0
+    hostname: kafka3
+    depends_on:
+      - zookeeper-1
+      - zookeeper-2
+      - zookeeper-3
+    environment:
+      KAFKA_BROKER_ID: 3
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper1:12181,zookeeper2:22181,zookeeper3:32181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka3:39092
+      KAFKA_LOG_DIRS: /kafka
+    ports:
+      - 39092:39092
+    volumes:
+      - ./kafka/logs/3:/kafka
+
+
+  connect-1:
+    hostname: connect1
+    image: confluentinc/cp-kafka-connect:6.2.0
+    depends_on:
+      - kafka-1
+      - kafka-2
+      - kafka-3
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: kafka1:19092,kafka2:29092,kafka3:39092 #kafka 클러스터의 broker들을 검색할 때 사용
+      CONNECT_REST_ADVERTISED_HOST_NAME: connect1
+      CONNECT_GROUP_ID: default-connect-group # connect worker가 join 할 connector cluster그룹명을 지정
+      CONNECT_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter # json converter (kafka connect 내부에서 사용하는 포멧과 kafka에 쓰여질 format - json, avro, protobuf )
+      CONNECT_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_CONFIG_STORAGE_TOPIC: config # standalone/distributed mode가 있는데 standalone mode이면 STORAGE_TOPIC 정보들은 local에 저장이 된다. distributed면 별도의 kafka topic에 저장
+      CONNECT_OFFSET_STORAGE_TOPIC: offset
+      CONNECT_STATUS_STORAGE_TOPIC: status
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_PLUGIN_PATH: /usr/share/java,/usr/share/confluent-hub-components
+      CONNECT_REST_PORT: 8083 # Connect가 서비스 할 포트
+    ports:
+      - 18083:8083 # 외부에서는 18083으로 호출하기 위해 port mapping
+    volumes:
+      - ./connectors/1:/usr/share/confluent-hub-components
+    command:  # kafka-connect-s3와 debezium 사용을 인스톨 / docker container를 계속 유지하기 위해서 sleep infinity 명령어 추가
+      - bash
+      - -c
+      - |
+        confluent-hub install --no-prompt confluentinc/kafka-connect-s3:10.0.3  
+        confluent-hub install --no-prompt debezium/debezium-connector-mysql:1.7.0
+        /etc/confluent/docker/run &
+        sleep infinity
+
+  localstack-1: # S3를 localhost로 사용하기 위한 localstack 설정
+    hostname: localstack1
+    image: localstack/localstack:0.12.6
+    environment:
+      AWS_DEFAULT_REGION: ap-northeast-2
+      EDGE_PORT: 4566
+      SERVICES: s3
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+    ports:
+      - 4566:4566 # edge port Mapping
+    volumes:
+      - ./localstack:/tmp/localstack
+
+  mysql-1:
+    hostname: mysql1
+    image: mysql/mysql-server:5.7.37
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_USER: root
+      MYSQL_ROOT_HOST: "%%"
+      MYSQL_DATABASE: redpolex
+      MYSQL_ROOT_PASSWORD: passwd # 아래 command는 bin log를 읽기 위한 몇 가지 설정
+    command: mysqld 
+      --server-id=1234
+      --max-binlog-size=4096
+      --binlog-format=ROW
+      --log-bin=bin-log
+      --sync-binlog=1
+      --binlog-rows-query-log-events=ON
+    # volume은 wsl2에서 mount permission 때문에 문제 발생 disable 추천
+    # volumes:
+    #   - ./mysql:/var/lib/mysql
