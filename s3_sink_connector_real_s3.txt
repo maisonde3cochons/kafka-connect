@@ -1,0 +1,23 @@
+# S3 Bucket 먼저 생성 필요
+curl -v -XPOST -H'Accept:application/json' -H'Content-Type:application/json' http://connect1:18083/connectors \
+  -d '{
+    "name": "s3-sink-connector",
+    "config": {
+      "topics": "mysql-1.redpolex.kafka",
+      "connector.class": "io.confluent.connect.s3.S3SinkConnector",
+      "flush.size": 1,
+      "s3.bucket.name": "red-kafka-test",
+      "s3.region": "ap-northeast-2",
+      "s3.part.size": "5242880",      
+      "format.class": "io.confluent.connect.s3.format.json.JsonFormat",
+      "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+      "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+      "key.converter.schemas.enable": "false",
+      "value.converter.schemas.enable": "false",
+      "storage.class": "io.confluent.connect.s3.storage.S3Storage",
+      "aws.access.key.id": "${ACCESS_KEY}",
+      "aws.secret.access.key": "${SECRET_ACCESS_KEY}",
+      "topics.dir": "topicsdir"
+    }
+  }'
+
