@@ -15,9 +15,9 @@
 ##### 3) Amazon S3 Sink Connector 설치 (docker-compose에 추가되어 있음)
 ##### 4) Datagen Source Connector 설치 (Sink Connector 테스트를 할 때 data를 generation 할 수 있음 - 테스트 시 유용)
 ##### 5) 화면 좌측 Plugin Type 설명 : <br/>
-    Source/Sink 타입을 선택해서 설치 할 수 있다. <br/>
-    (JDBC Connector는 Source/Sink 둘 다 지원) <br/>
-    Transform 타입은 Incoming data가 Kafka Broker에 저장되기 전에 Transform을 할 수 있는 플러그인 (or sink로 전달되기 전에 Transform) <br/>
+    - Source/Sink 타입을 선택해서 설치 할 수 있다. 
+    - (JDBC Connector는 Source/Sink 둘 다 지원) 
+    - Transform 타입은 Incoming data가 Kafka Broker에 저장되기 전에 Transform을 할 수 있는 플러그인 (or sink로 전달되기 전에 Transform) 
 ##### 6) Debezium MySQL CDC Source Connector 설치 (docker-compose에 추가되어 있음)
 
 
