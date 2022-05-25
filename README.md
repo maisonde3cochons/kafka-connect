@@ -107,7 +107,7 @@ curl -v -XPOST -H'Accept:application/json' -H'Content-Type:application/json' htt
 }'
 ```
 
-> 9. ##### s3 connector 등록 (s3.bucket.name, s3.region, {myip}, aws.access.key.id, aws.secret.access.key 등을 내 환경에 맞게 변경)
+> 9. ##### s3 connector 등록 (s3.bucket.name, s3.region, {myip}, aws.access.key.id, aws.secret.access.key 등을 내 환경에 맞게 변경) <br> 실 AWS S3에 업로드를 원하면 <b>s3_sink_connector_real_s3.txt</b> 파일 참고!!
 ```
 curl -v -XPOST -H'Accept:application/json' -H'Content-Type:application/json' http://connect1:18083/connectors \
   -d '{
