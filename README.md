@@ -9,43 +9,44 @@
 
 ---------------------------
 
-* 사전준비사항 :
-1) Confluent Hub 접속(https://www.confluent.io/hub/)
-2) 화면 좌측 License에서 Free 선택
-3) Amazon S3 Sink Connector 설치 (docker-compose에 추가되어 있음)
-4) Datagen Source Connector 설치 (Sink Connector 테스트를 할 때 data를 generation 할 수 있음 - 테스트 시 유용)
-5) 화면 좌측 Plugin Type 설명 : 
-   Source/Sink 타입을 선택해서 설치 할 수 있다. 
-   (JDBC Connector는 Source/Sink 둘 다 지원)
-   Transform 타입은 Incoming data가 Kafka Broker에 저장되기 전에 Transform을 할 수 있는 플러그인 (or sink로 전달되기 전에 Transform)
-6) Debezium MySQL CDC Source Connector 설치 (docker-compose에 추가되어 있음)
+* #### 사전준비사항 :
+##### 1) Confluent Hub 접속(https://www.confluent.io/hub/)
+##### 2) 화면 좌측 License에서 Free 선택
+##### 3) Amazon S3 Sink Connector 설치 (docker-compose에 추가되어 있음)
+##### 4) Datagen Source Connector 설치 (Sink Connector 테스트를 할 때 data를 generation 할 수 있음 - 테스트 시 유용)
+##### 5) 화면 좌측 Plugin Type 설명 : 
+#####    Source/Sink 타입을 선택해서 설치 할 수 있다. 
+#####    (JDBC Connector는 Source/Sink 둘 다 지원)
+#####    Transform 타입은 Incoming data가 Kafka Broker에 저장되기 전에 Transform을 할 수 있는 플러그인 (or sink로 전달되기 전에 Transform)
+##### 6) Debezium MySQL CDC Source Connector 설치 (docker-compose에 추가되어 있음)
 
 <br>
+---------------------------
 
-* 실습진행 :
-> 1. <b> /etc/hosts </b> 
+*  #### 실습진행 :
+> 1. ##### <b> /etc/hosts </b> 설정
 ```
 127.0.0.1   kafka1   kafka2  kafka3   connect1  zookeeper1  zookeeper2  zookeeper3  localstack1
 ```
 
-> 2. WSL2 환경에서 volume mount permission 때문에 container 생성 시 error가 발생하여 disable이 필요하며 아래 폴더를 매번 삭제해줘야 한다
+> 2. ##### WSL2 환경에서 volume mount permission 때문에 container 생성 시 error가 발생하여 disable이 필요하며 아래 폴더를 매번 삭제해줘야 한다
 ```
 rm -rf connectors/ kafka/ localstack/ zookeeper/
 ```
 
-> 3. docker-compose 파일을 실행한다. (localstack-1은 로컬환경에서 S3를 사용할 수 있게 해주며, 주석처리하고 실제 AWS S3 Bucket을 사용해도 된다)
+> 3. ##### docker-compose 파일을 실행한다. (localstack-1은 로컬환경에서 S3를 사용할 수 있게 해주며, 주석처리하고 실제 AWS S3 Bucket을 사용해도 된다)
 ```
 docker-compose -f docker-compose-confluent-connect.yml up
 ```
 
-> 4. WSL2 환경에서 에러 발생 시 home path의 .docker/config.json 파일을 확인해본다(문제 발생 시 docker desktop 재기동 후 아래처럼 변경)
+> 4. ##### WSL2 환경에서 에러 발생 시 home path의 .docker/config.json 파일을 확인해본다(문제 발생 시 docker desktop 재기동 후 아래처럼 변경)
 ```  
   "credsStore": "desktop.exe"
   =>
   "credStore": "desktop.exe"
 
 ```
-> 5. Container를 띄웠으면 MySQL Client 및 AWS CLI를 설치한다 
+> 5. ##### Container를 띄웠으면 MySQL Client 및 AWS CLI를 설치한다 
 ```
 # Toad For MySQL 설치
 https://penguincloud.tistory.com/93
@@ -54,7 +55,7 @@ https://penguincloud.tistory.com/93
 https://docs.aws.amazon.com/ko_kr/cli/latest/userguide/install-cliv2-mac.html#cliv2-mac-install-cmd
 ```
 
-> 6. localstack(S3) 설정 
+> 6. ##### localstack(S3) 설정 
 ```
 aws configure
 aws_access_key_id:  test
@@ -62,7 +63,7 @@ aws_secret_access_key : test
 region : ap-northeast-2
 ```
 
-> 7. AWS CLI로 bucket 생성 및 object 업로드/다운로드 
+> 7. ##### AWS CLI로 bucket 생성 및 object 업로드/다운로드 
 ```
 aws s3 --endpoint-url=http://localhost:4566 ls
 
@@ -79,7 +80,7 @@ aws s3api list-objects --endpoint-url=http://localhost:4566 --bucket repdpolex-k
 aws s3api get-object --endpoint-url=http://localhost:4566 --bucket repdpolex-kafka-2022 --key hello output.txt
 ```
 
-> 8. mysql connector 등록 ({myip}를 로컬 IP로 변경)
+> 8. ##### mysql connector 등록 ({myip}를 로컬 IP로 변경)
 ```
 curl -v -XPOST -H'Accept:application/json' -H'Content-Type:application/json' http://connect1:18083/connectors \
   -d '
@@ -106,7 +107,7 @@ curl -v -XPOST -H'Accept:application/json' -H'Content-Type:application/json' htt
 }'
 ```
 
-> 9. s3 connector 등록 (s3.bucket.name, s3.region, {myip}, aws.access.key.id, aws.secret.access.key 등을 내 환경에 맞게 변경)
+> 9. ##### s3 connector 등록 (s3.bucket.name, s3.region, {myip}, aws.access.key.id, aws.secret.access.key 등을 내 환경에 맞게 변경)
 ```
 curl -v -XPOST -H'Accept:application/json' -H'Content-Type:application/json' http://connect1:18083/connectors \
   -d '{
@@ -132,7 +133,7 @@ curl -v -XPOST -H'Accept:application/json' -H'Content-Type:application/json' htt
   }'
 ```
 
-> 10. connector 설정 및 상태 확인
+> 10. ##### connector 설정 및 상태 확인
 ```
 # Cluster status
 curl -v -XGET -H'Accept: application/json' http://connect1:18083
@@ -153,7 +154,7 @@ curl -v -XPUT -H'Accept: application/json' http://connect1:18083/connectors/mysq
 
 ```
 
-> 11. DB Client 툴에서 Table 및 Data를 생성한다.
+> 11. ##### DB Client 툴에서 Table 및 Data를 생성한다.
 ```
 # mysql queries
 /* CREATE TABLE kafka (
@@ -171,17 +172,17 @@ INSERT INTO kafka(name, phone_no) VALUES('Joe', '01073219284');
 SELECT * FROM kafka;
 ```
 
-> 12. S3 Bucket에 마지막으로 Insert 한 Joe 관련 Data가 들어가있는지 확인한다(Data의 Key 확인) :
+> 12. ##### S3 Bucket에 마지막으로 Insert 한 Joe 관련 Data가 들어가있는지 확인한다(Data의 Key 확인) :
 ```
 aws s3api list-objects --endpoint-url=http://localhost:4566 --bucket repdpolex-kafka-2022
 ```
 
-> 13. 파일을 S3로부터 다운로드 받아서 내용을 output.json이라는 파일로 저장한다.
+> 13. ##### 파일을 S3로부터 다운로드 받아서 내용을 output.json이라는 파일로 저장한다.
 ```
 aws s3api get-object --endpoint-url=http://localhost:4566 --bucket repdpolex-kafka-2022 --key topicsdir/mysql-1.redpolex.kafka/partition=0/mysql-1.redpolex.kafka+0+0000000004.json output.json
 ```
 
-> 14. 내용을 확인해보면 해당 DB에서 Insert한 Data가 잘 들어가 있다. (op : c = create )
+> 14. ##### 내용을 확인해보면 해당 DB에서 Insert한 Data가 잘 들어가 있다. (op : c = create )
 ```
 {
    "op":"c",
@@ -213,12 +214,12 @@ aws s3api get-object --endpoint-url=http://localhost:4566 --bucket repdpolex-kaf
 }
 ```
 
-> 15. 이번에는 DB Data를 Update 해본다
+> 15. ##### 이번에는 DB Data를 Update 해본다
 ```
 UPDATE kafka SET phone_no='01077778888' where name='Sam';
 ```
 
-> 16. S3 Bucket을 확인하고 이전처럼 Key파일을 조회하여 다운받는다. 
+> 16. ##### S3 Bucket을 확인하고 이전처럼 Key파일을 조회하여 다운받는다. 
 ```
 #조회
 aws s3api list-objects --endpoint-url=http://localhost:4566 --bucket repdpolex-kafka-2022
@@ -227,7 +228,7 @@ aws s3api list-objects --endpoint-url=http://localhost:4566 --bucket repdpolex-k
 aws s3api get-object --endpoint-url=http://localhost:4566 --bucket repdpolex-kafka-2022 --key topicsdir/mysql-1.redpolex.kafka/partition=0/mysql-1.redpolex.kafka+0+0000000004.json output2.json
 ```
 
-> 17. output2.json 파일을 확인해본다 (op : u = update )
+> 17. ##### output2.json 파일을 확인해본다 (op : u = update )
 ```
 {
    "op":"u",
