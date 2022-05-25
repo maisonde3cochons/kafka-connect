@@ -2,14 +2,14 @@
 ------------------------------
 
 
-* Kafka Connect : 별도의 개발 없이 Kafka를 통해 Data Source/Destination 간 메세지 송수신을 가능하도록 해주는 솔루션
+- ##### Kafka Connect : 별도의 개발 없이 Kafka를 통해 Data Source/Destination 간 메세지 송수신을 가능하도록 해주는 솔루션
 
-- Source Connector : Consumer 역할(ex: Debezium=MySQL의 bin log를 읽어서 Kafka로 전송한다)
-- Sink Connector : Producer 역할(ex: S3 Sync Connector)
+- ##### Source Connector : Consumer 역할(ex: Debezium=MySQL의 bin log를 읽어서 Kafka로 전송한다)
+- ##### Sink Connector : Producer 역할(ex: S3 Sync Connector)
 
 ---------------------------
 
-* #### 사전준비사항 :
+* #### 사전확인사항 :
 ##### 1) Confluent Hub 접속(https://www.confluent.io/hub/)
 ##### 2) 화면 좌측 License에서 Free 선택
 ##### 3) Amazon S3 Sink Connector 설치 (docker-compose에 추가되어 있음)
