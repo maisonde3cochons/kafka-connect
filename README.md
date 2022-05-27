@@ -1,6 +1,34 @@
 ### [kafka connect 사용법]
 ------------------------------
 
+#### [주의사항!!! docker-compose 파일을 WLS2에서 실행 시 주요 이슈가 발생 부분]
+
+##### 1. docker-compose 실행 path가 windows directory일 경우 volume mount(mysql/kafka/zookeeper) 문제가 발생한다
+> 반드시 avoid!! <b>/mnt/c/ </b> 나 <b>/mnt/d/ </b> 에서 실행하지 않는다
+
+##### 2. docker-compose 실행 후 생성되는 kafka/zooker의 권한을 꼭 확인한다
+> docker container와 mount되는 path directory가 root권한으로 생성 되는 경우가 많다.
+> 꼭 사전에 kafka/logs, zookeeper/data 폴더 생성 후 실행 user 권한으로 변경해준다
+```
+mkdir -p kafka/logs 
+mkdir -p zookeeper/data
+chown -R user:user zookeeper kafka
+```
+
+##### 3. /etc/hosts를 확인해서 사용할 도메인이 등록되어 있는지 확인한다
+```
+127.0.0.1 kafka zookeeper
+```
+
+##### 4. docker-compose 실행 후 docker container에 mount된 volume 권한을 변경하지 않는다
+> docker-compose 재실행 시 권한 문제가 발생한다
+
+![image](https://user-images.githubusercontent.com/30817824/170620369-16000fab-b9e1-47af-b95b-93e1cebf4282.png)
+
+
+-----------------------
+
+
 
 - ##### Kafka Connect : 별도의 개발 없이 Kafka를 통해 Data Source/Destination 간 메세지 송수신을 가능하도록 해주는 솔루션
 
